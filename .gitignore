@@ -1,0 +1,16 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Compilación
+bin/
+obj/
+
+# Archivos temporales
+*.tmp
+*.log
+
+# Configuración sensible
+.env
+secrets.json
