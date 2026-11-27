@@ -13,18 +13,33 @@ public class TmdbService
         Timeout = TimeSpan.FromSeconds(15)
     };
 
-    public async Task<IReadOnlyList<ResultadoTmdb>> BuscarAsync(
-        string consulta, string tipo)
+    public Task<IReadOnlyList<ResultadoTmdb>> BuscarAsync(string consulta, string tipo)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(consulta);
 
-        string ruta = tipo switch
-        {
-            "pelicula" => "movie",
-            "serie" => "tv",
-            _ => throw new ArgumentException("Selecciona película o serie.", nameof(tipo))
-        };
+        string ruta = ObtenerRutaTipo(tipo);
+        string query = Uri.EscapeDataString(consulta.Trim());
 
+        return ConsultarAsync($"search/{ruta}?query={query}&language=es-ES", tipo);
+    }
+
+    public Task<IReadOnlyList<ResultadoTmdb>> ObtenerMejorValoradosAsync(string tipo)
+    {
+        string ruta = ObtenerRutaTipo(tipo);
+
+        return ConsultarAsync($"{ruta}/top_rated?language=es-ES&page=1", tipo);
+    }
+
+    private static string ObtenerRutaTipo(string tipo) => tipo switch
+    {
+        "pelicula" => "movie",
+        "serie" => "tv",
+        _ => throw new ArgumentException("Selecciona película o serie.", nameof(tipo))
+    };
+
+    private async Task<IReadOnlyList<ResultadoTmdb>> ConsultarAsync(
+        string ruta, string tipo)
+    {
         string? token = Environment.GetEnvironmentVariable("TMDB_READ_TOKEN");
 
         if (string.IsNullOrWhiteSpace(token))
@@ -33,9 +48,7 @@ public class TmdbService
                 "Configura TMDB_READ_TOKEN antes de iniciar FanVerse.");
         }
 
-        string query = Uri.EscapeDataString(consulta.Trim());
-        string url = $"https://api.themoviedb.org/3/search/{ruta}"
-            + $"?query={query}&language=es-ES";
+        string url = $"https://api.themoviedb.org/3/{ruta}";
 
         using var peticion = new HttpRequestMessage(HttpMethod.Get, url);
         peticion.Headers.Authorization =
@@ -63,7 +76,10 @@ public class TmdbService
                 titulo,
                 item.Overview ?? "",
                 string.IsNullOrWhiteSpace(fecha) ? null : fecha,
-                string.IsNullOrWhiteSpace(item.PosterPath) ? null : item.PosterPath));
+                string.IsNullOrWhiteSpace(item.PosterPath) ? null : item.PosterPath)
+                        {
+                            Valoracion = item.VoteAverage
+                        });
         }
 
         return resultados;
@@ -89,5 +105,8 @@ public class TmdbService
 
         [JsonPropertyName("poster_path")]
         public string? PosterPath { get; init; }
+
+        [JsonPropertyName("vote_average")]
+public double? VoteAverage { get; init; }
     }
 }

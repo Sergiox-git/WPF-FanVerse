@@ -31,4 +31,7 @@ public class Contenido
     [JsonPropertyName("posterPath")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? PosterPath { get; init; }
+
+    [JsonIgnore]
+    public Uri? PosterUrl => ResultadoTmdb.ConstruirPosterUrl(PosterPath);
 }

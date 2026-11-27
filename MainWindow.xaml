@@ -137,99 +137,246 @@
 
                 <!-- INICIO: TMDB -->
                 <TabItem Header="Inicio">
+                    <TabItem.Resources>
+                        <ItemsPanelTemplate x:Key="FilaRanking">
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
 
-                    <Grid Background="{StaticResource CarbonBrush}"
-                          Margin="20">
+                        <DataTemplate x:Key="TarjetaRanking">
+                            <Border Background="{StaticResource PanelBrush}"
+                    BorderBrush="{StaticResource BordeBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="8"
+                    Margin="0,0,12,6">
+                                <StackPanel Width="144">
+                                    <Grid Height="216"
+                          Background="{StaticResource CarbonBrush}"
+                          ClipToBounds="True">
+                                        <TextBlock Text="Sin carátula"
+                                   Foreground="{StaticResource MarfilBrush}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                                        <Image Source="{Binding PosterUrl}"
+                               Stretch="UniformToFill"/>
+                                    </Grid>
 
-                        <StackPanel>
+                                    <TextBlock Text="{Binding Titulo}"
+                               ToolTip="{Binding Titulo}"
+                               Foreground="{StaticResource MarfilBrush}"
+                               FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis"
+                               Margin="0,8,0,4"/>
 
-                            <TextBlock Text="DESCUBRE TU PRÓXIMA HISTORIA"
-                                       FontSize="30"
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource MarfilBrush}"
-                                       Margin="0,0,0,10"/>
+                                    <TextBlock Text="{Binding Valoracion,
+                                              StringFormat={}{0:0.0}/10,
+                                              TargetNullValue='Sin valoración'}"
+                               Foreground="{StaticResource AmarilloBrush}"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </TabItem.Resources>
 
-                            <TextBlock Text="Explora películas y series de TMDB."
-                                       FontSize="16"
-                                       Foreground="{StaticResource MarfilBrush}"
-                                       Margin="0,0,0,30"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="24">
+                            <TextBlock Text="Descubre tu próxima historia"
+                       FontSize="32"
+                       FontWeight="Bold"
+                       Foreground="{StaticResource MarfilBrush}"
+                       TextWrapping="Wrap"/>
 
-                            <TextBox Height="40"
-                                     Width="400"
-                                     HorizontalAlignment="Left"
-                                     VerticalContentAlignment="Center"
-                                     Padding="12,0"
-                                     Text="Buscar películas y series..."/>
+                            <Button x:Name="ActualizarInicioButton"
+                    Content="Actualizar rankings"
+                    HorizontalAlignment="Left"
+                    Background="{StaticResource PanelBrush}"
+                    Foreground="{StaticResource MarfilBrush}"
+                    Padding="12,6"
+                    Margin="0,12,0,0"
+                    Click="ActualizarInicio_Click"/>
 
+                            <TextBlock x:Name="EstadoInicioTextBlock"
+                       Foreground="{StaticResource MarfilBrush}"
+                       TextWrapping="Wrap"
+                       Margin="0,8,0,0"/>
+
+                            <TextBlock Text="Películas mejor valoradas"
+                       FontSize="22"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource MarfilBrush}"
+                       Margin="0,20,0,10"/>
+
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Disabled">
+                                <ItemsControl x:Name="PeliculasRankingItems"
+                              ItemsPanel="{StaticResource FilaRanking}"
+                              ItemTemplate="{StaticResource TarjetaRanking}"/>
+                            </ScrollViewer>
+
+                            <TextBlock Text="Series mejor valoradas"
+                       FontSize="22"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource MarfilBrush}"
+                       Margin="0,24,0,10"/>
+
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Disabled">
+                                <ItemsControl x:Name="SeriesRankingItems"
+                              ItemsPanel="{StaticResource FilaRanking}"
+                              ItemTemplate="{StaticResource TarjetaRanking}"/>
+                            </ScrollViewer>
                         </StackPanel>
-
-                    </Grid>
-
+                    </ScrollViewer>
                 </TabItem>
 
                 <!-- MI CATÁLOGO: FIREBASE -->
                 <TabItem Header="Mi catálogo">
+                    <TabItem.Resources>
+                        <Style x:Key="AccionCatalogo" TargetType="Button">
+                            <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource MarfilBrush}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource BordeBrush}"/>
+                            <Setter Property="Padding" Value="14,7"/>
+                            <Setter Property="MinHeight" Value="36"/>
+                            <Setter Property="Margin" Value="0,0,8,6"/>
+                        </Style>
+                    </TabItem.Resources>
 
-                    <Grid Background="{StaticResource CarbonBrush}"
-                          Margin="20">
+                    <Grid Margin="24" Background="{StaticResource CarbonBrush}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                        <StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="Mi catálogo"
+                       FontSize="32"
+                       FontWeight="Bold"
+                       Foreground="{StaticResource MarfilBrush}"
+                       Margin="0,0,0,14"/>
 
-                            <TextBlock Text="MI CATÁLOGO"
-                                       FontSize="30"
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource MarfilBrush}"
-                                       Margin="0,0,0,10"/>
+                            <WrapPanel>
+                                <Button Content="Buscar en TMDB"
+                        Style="{StaticResource AccionCatalogo}"
+                        Background="{StaticResource RojoBrush}"
+                        Foreground="White"
+                        Click="BuscarTmdb_Click"/>
 
-                            <TextBlock Text="Gestiona tus películas y series guardadas."
-                                       FontSize="16"
-                                       Foreground="{StaticResource MarfilBrush}"
-                                       Margin="0,0,0,30"/>
+                                <Button Content="+ Añadir manualmente"
+                        Style="{StaticResource AccionCatalogo}"
+                        Click="AnadirContenido_Click"/>
 
-                            <Button Content="+ Añadir película o serie"
-                                    Width="220"
-                                    Height="42"
-                                    HorizontalAlignment="Left"
-                                    Background="{StaticResource RojoBrush}"
-                                    Foreground="White"
-                                    Click="AnadirContenido_Click"/>
+                                <Button Content="Editar"
+                        Style="{StaticResource AccionCatalogo}"
+                        Click="EditarContenido_Click"/>
 
-                            <Button Content="Editar"
-                                     Height="42"
-                                     Width="220"
-                                     Margin="0,8,0,0"
-                                     HorizontalAlignment="Left"
-                                     Click="EditarContenido_Click"/>
-                            
-                            <Button x:Name="EliminarContenidoButton"
-                                       Content="Eliminar"
-                                       Width="220"
-                                       Height="42"
-                                       Margin="0,8,0,0"
-                                       HorizontalAlignment="Left"
-                                       Click="EliminarContenido_Click"/>
-
-                            <Button Content="Buscar en TMDB"
-                                    Width="220"
-                                    Height="42"
-                                    Margin="0,8,0,0"
-                                    HorizontalAlignment="Left"
-                                    Click="BuscarTmdb_Click"/>
+                                <Button x:Name="EliminarContenidoButton"
+                        Content="Eliminar"
+                        Style="{StaticResource AccionCatalogo}"
+                        Click="EliminarContenido_Click"/>
+                            </WrapPanel>
 
                             <TextBlock x:Name="EstadoCatalogoTextBlock"
-                                        Foreground="{StaticResource MarfilBrush}"
-                                        Margin="0,12,0,6"
-                                        TextWrapping="Wrap" />
-
-                            <ListBox x:Name="CatalogoListBox"
-                                        DisplayMemberPath="Value.Titulo"
-                                        SelectedValuePath="Key"
-                                        MaxHeight="320" />
-
+                       Foreground="{StaticResource MarfilBrush}"
+                       TextWrapping="Wrap"
+                       Margin="0,4,0,0"/>
                         </StackPanel>
 
-                    </Grid>
+                        <ListBox x:Name="CatalogoListBox"
+                 Grid.Row="1"
+                 SelectedValuePath="Key"
+                 Background="Transparent"
+                 BorderThickness="0"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto">
 
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Margin" Value="0,0,12,12"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <Border x:Name="Tarjeta"
+                                        Background="{StaticResource PanelBrush}"
+                                        BorderBrush="{StaticResource BordeBrush}"
+                                        BorderThickness="2"
+                                        CornerRadius="10"
+                                        Padding="8">
+                                                    <ContentPresenter/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Tarjeta"
+                                                Property="BorderBrush"
+                                                Value="{StaticResource MarfilBrush}"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                                        <Setter TargetName="Tarjeta"
+                                                Property="BorderBrush"
+                                                Value="{StaticResource AmarilloBrush}"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter TargetName="Tarjeta"
+                                                Property="BorderBrush"
+                                                Value="{StaticResource RojoBrush}"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Width="144">
+                                        <Grid Height="216"
+                              Background="{StaticResource CarbonBrush}"
+                              ClipToBounds="True">
+                                            <TextBlock Text="Sin carátula"
+                                       Foreground="{StaticResource MarfilBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                                            <Image Source="{Binding Value.PosterUrl}"
+                                   Stretch="UniformToFill"
+                                   IsHitTestVisible="False"/>
+                                        </Grid>
+
+                                        <TextBlock Text="{Binding Value.Titulo}"
+                                   Foreground="{StaticResource MarfilBrush}"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding Value.Titulo}"
+                                   Margin="0,8,0,5"/>
+
+                                        <Border Background="{StaticResource CarbonBrush}"
+                                CornerRadius="4"
+                                HorizontalAlignment="Left"
+                                Padding="7,3">
+                                            <TextBlock x:Name="EtiquetaTipo"
+                                       Text="Sin tipo"
+                                       FontSize="11"
+                                       Foreground="{StaticResource AmarilloBrush}"/>
+                                        </Border>
+                                    </StackPanel>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding Value.Tipo}" Value="pelicula">
+                                            <Setter TargetName="EtiquetaTipo" Property="Text" Value="Película"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Value.Tipo}" Value="serie">
+                                            <Setter TargetName="EtiquetaTipo" Property="Text" Value="Serie"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
                 </TabItem>
 
                 <!-- RESEÑAS PÚBLICAS -->

@@ -11,6 +11,8 @@
 
                 <ResourceDictionary Source="Styles/Buttons.xaml"/>
 
+                <ResourceDictionary Source="Styles/Dialogos.xaml"/>
+
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

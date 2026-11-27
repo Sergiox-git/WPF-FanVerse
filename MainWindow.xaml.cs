@@ -7,6 +7,7 @@ using System.Windows.Media;
 using FanVerse.Models;
 using FanVerse.Services;
 using FanVerse.Views;
+using System.Linq;
 
 namespace FanVerse
 {
@@ -15,17 +16,62 @@ namespace FanVerse
         private readonly SesionUsuario _sesion;
         private readonly CatalogoService _catalogo = new();
 
+        private readonly TmdbService _tmdb = new();
+
         public MainWindow(SesionUsuario sesion)
         {
             _sesion = sesion;
             InitializeComponent();
             ActualizarMenu();
+
+            Loaded += async (_, _) => await CargarRankingsAsync();
         }
 
         private void Inicio_Click(object sender, RoutedEventArgs e)
         {
             MainTabs.SelectedIndex = 0;
             ActualizarMenu();
+        }
+        private async void ActualizarInicio_Click(object sender, RoutedEventArgs e)
+        {
+            await CargarRankingsAsync();
+        }
+
+        private async Task CargarRankingsAsync()
+        {
+            ActualizarInicioButton.IsEnabled = false;
+            EstadoInicioTextBlock.Text = "Cargando rankings de TMDB…";
+
+            try
+            {
+                var peliculas = _tmdb.ObtenerMejorValoradosAsync("pelicula");
+                var series = _tmdb.ObtenerMejorValoradosAsync("serie");
+
+                await Task.WhenAll(peliculas, series);
+
+                PeliculasRankingItems.ItemsSource = (await peliculas).Take(10).ToList();
+                SeriesRankingItems.ItemsSource = (await series).Take(10).ToList();
+                EstadoInicioTextBlock.Text = "";
+            }
+            catch (InvalidOperationException ex)
+            {
+                EstadoInicioTextBlock.Text = ex.Message;
+            }
+            catch (HttpRequestException ex) when (
+                ex.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
+            {
+                EstadoInicioTextBlock.Text = "TMDB rechazó el acceso. Revisa TMDB_READ_TOKEN.";
+            }
+            catch (Exception ex) when (
+                ex is HttpRequestException or TaskCanceledException or JsonException)
+            {
+                EstadoInicioTextBlock.Text =
+                    "No se pudieron cargar los rankings. Pulsa Actualizar rankings para reintentar.";
+            }
+            finally
+            {
+                ActualizarInicioButton.IsEnabled = true;
+            }
         }
 
         private async void Catalogo_Click(object sender, RoutedEventArgs e)
@@ -252,6 +298,7 @@ namespace FanVerse
                     break;
             }
         }
+
 
         private void Creditos_Click(object sender, RoutedEventArgs e)
         {
