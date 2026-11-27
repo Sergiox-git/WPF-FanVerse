@@ -2,26 +2,39 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Style="{StaticResource VentanaFanVerse}"
-        Title="Créditos de FanVerse" Width="460"
+        Title="Créditos de FanVerse" Width="520"
         SizeToContent="Height" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner">
-    <Border Style="{StaticResource SuperficieDialogo}" Margin="20" Padding="24">
+    <Border Style="{StaticResource SuperficieDialogo}" Margin="20" Padding="26">
         <StackPanel>
             <TextBlock Text="Créditos" Style="{StaticResource TituloDialogo}"/>
 
-            <Border Background="{StaticResource CarbonBrush}" CornerRadius="8"
-                    Padding="12" Margin="0,18,0,14" HorizontalAlignment="Left">
-                <Image Source="/Assets/Images/tmdb_logo.png" Width="132" Height="44"
-                       Stretch="Uniform" AutomationProperties.Name="The Movie Database"/>
+            <Border Background="{StaticResource CarbonBrush}" CornerRadius="10"
+                    Padding="16" Margin="0,20,0,14" HorizontalAlignment="Left">
+                <Image Source="/Assets/Images/tmdb_logo.png" Width="172" Height="124"
+                       Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"
+                       AutomationProperties.Name="The Movie Database"/>
             </Border>
 
             <TextBlock Text="This product uses the TMDB API but is not endorsed or certified by TMDB."
                        Foreground="{StaticResource MarfilBrush}" TextWrapping="Wrap"
                        Language="en-US"/>
 
+            <Border Height="1" Background="{StaticResource BordeBrush}" Margin="0,20,0,16"/>
+
+            <TextBlock Text="Autoría" Foreground="{StaticResource AmarilloBrush}"
+                       FontSize="13" FontWeight="SemiBold" Margin="0,0,0,8"/>
+            <TextBlock Text="Sergio González Quintana" FontSize="16" FontWeight="SemiBold"
+                       Margin="0,0,0,4"/>
+            <TextBlock Text="Raúl Valiente Sánchez" FontSize="16" FontWeight="SemiBold"/>
+
+            <TextBlock TextWrapping="Wrap" Margin="0,12,0,0">
+                <Run Text="Proyecto académico realizado para la asignatura de "/><Run Text="Desarrollo de Interfaces" FontWeight="SemiBold"/><Run Text="."/>
+            </TextBlock>
+
             <Button Content="Cerrar" Style="{StaticResource BotonDialogo}"
                     IsCancel="True" IsDefault="True"
-                    HorizontalAlignment="Right" Margin="0,20,0,0"/>
+                    HorizontalAlignment="Right" Margin="0,22,0,0"/>
         </StackPanel>
     </Border>
 </Window>
