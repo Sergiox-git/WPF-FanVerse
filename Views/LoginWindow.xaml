@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Style="{StaticResource VentanaFanVerse}"
         Title="FanVerse · Acceso"
-        Width="840" Height="510" MinWidth="650" MinHeight="440"
+        Width="840" Height="555" MinWidth="650" MinHeight="480"
         WindowStartupLocation="CenterScreen"
         FocusManager.FocusedElement="{Binding ElementName=CorreoTextBox}">
     <Grid Margin="24">
@@ -52,6 +52,11 @@
                     <Button x:Name="EntrarButton" Content="Entrar"
                             Style="{StaticResource BotonPrincipalDialogo}"
                             IsDefault="True" Click="Entrar_Click"/>
+
+                    <Button Content="Crear cuenta"
+                            Style="{StaticResource BotonDialogo}"
+                            Margin="0,10,0,0" Click="AbrirRegistro_Click"
+                            IsEnabled="{Binding IsEnabled, ElementName=EntrarButton}"/>
 
                     <TextBlock x:Name="MensajeTextBlock" Style="{StaticResource EstadoDialogo}"
                                Margin="0,12,0,0" AutomationProperties.LiveSetting="Polite"/>

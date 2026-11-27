@@ -1,8 +1,9 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using FanVerse.Models;
 using FanVerse.Services;
@@ -178,15 +179,12 @@ namespace FanVerse
                 return;
             }
 
-            MessageBoxResult confirmacion = MessageBox.Show(
-                this,
-                $"¿Quieres eliminar «{seleccionado.Value.Titulo}» del catálogo?",
-                "Confirmar eliminación",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning,
-                MessageBoxResult.No);
+            var confirmacion = new ConfirmarEliminacionWindow(seleccionado.Value.Titulo)
+            {
+                Owner = this
+            };
 
-            if (confirmacion != MessageBoxResult.Yes)
+            if (confirmacion.ShowDialog() != true)
             {
                 return;
             }
@@ -220,52 +218,75 @@ namespace FanVerse
             }
         }
 
-        private async void BuscarTmdb_Click(object sender, RoutedEventArgs e)
+        private async void AbrirBusquedaTmdb_Click(object sender, RoutedEventArgs e)
         {
-            var ventana = new BuscarTmdbWindow
+            var ventana = new BuscarTmdbWindow(_catalogo, _sesion.IdToken, soloCatalogo: false)
             {
                 Owner = this
             };
 
-            if (ventana.ShowDialog() != true ||
-                ventana.ResultadoSeleccionado is not ResultadoTmdb resultado)
+            ventana.ShowDialog();
+
+            if (ventana.ContenidoImportadoId is string contenidoId)
+            {
+                await CargarCatalogoAsync(contenidoId);
+            }
+        }
+
+        private void AbrirBusquedaCatalogo_Click(object sender, RoutedEventArgs e)
+        {
+            var ventana = new BuscarTmdbWindow(_catalogo, _sesion.IdToken, soloCatalogo: true)
+            {
+                Owner = this
+            };
+
+            ventana.ShowDialog();
+        }
+
+
+
+        private async void ImportarFicha_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button boton || boton.DataContext is not ResultadoTmdb resultado)
             {
                 return;
             }
 
-            var boton = (System.Windows.Controls.Button)sender;
+            bool desdeCatalogo = MainTabs.SelectedIndex == 1;
+            TextBlock estado = desdeCatalogo ? EstadoCatalogoTextBlock : EstadoImportacionInicio;
+            boton.Content = "Importando…";
             boton.IsEnabled = false;
-            EstadoCatalogoTextBlock.Text = "Importando desde TMDB…";
 
             try
             {
                 var (contenidoId, creado) =
                     await _catalogo.ImportarTmdbAsync(resultado, _sesion.IdToken);
 
-                await CargarCatalogoAsync(contenidoId);
-
-                if (CatalogoListBox.SelectedValue is string idSeleccionado &&
-                    idSeleccionado == contenidoId)
+                if (MainTabs.SelectedIndex == 1)
                 {
-                    EstadoCatalogoTextBlock.Text = creado
-                        ? "Contenido importado."
-                        : "Este contenido ya estaba en el catálogo.";
+                    await CargarCatalogoAsync(contenidoId);
                 }
+
+                boton.Content = "En catálogo";
+                estado.Text = creado
+                    ? $"«{resultado.Titulo}» se añadió al catálogo."
+                    : $"«{resultado.Titulo}» ya estaba en el catálogo.";
             }
             catch (HttpRequestException ex) when (
                 ex.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
             {
-                EstadoCatalogoTextBlock.Text =
-                    "Firebase rechazó la importación. Revisa la sesión, el permiso de editor y las reglas.";
+                boton.Content = "Importar";
+                estado.Text = "Firebase rechazó el guardado. Comprueba la sesión y el permiso de editor.";
             }
             catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
             {
-                EstadoCatalogoTextBlock.Text =
-                    "No se pudo confirmar la importación. Vuelve a cargar el catálogo para comprobarlo.";
+                boton.Content = "Reintentar";
+                estado.Text = $"No se pudo confirmar el guardado de «{resultado.Titulo}».";
             }
             catch (InvalidOperationException ex)
             {
-                EstadoCatalogoTextBlock.Text = ex.Message;
+                boton.Content = "Importar";
+                estado.Text = ex.Message;
             }
             finally
             {

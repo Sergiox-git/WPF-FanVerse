@@ -1,8 +1,7 @@
-﻿using FanVerse.Models;
+using FanVerse.Models;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Net;
 
 namespace FanVerse.Services;
 
@@ -48,14 +47,7 @@ public class CatalogoService
     public async Task<(string ContenidoId, bool Creado)> ImportarTmdbAsync(
     ResultadoTmdb resultado, string idToken)
     {
-        string tipoTmdb = resultado.Tipo switch
-        {
-            "pelicula" => "movie",
-            "serie" => "tv",
-            _ => throw new ArgumentException("Tipo de TMDB desconocido.", nameof(resultado))
-        };
-
-        string contenidoId = $"tmdb_{tipoTmdb}_{resultado.TmdbId}";
+        var (contenidoId, tipoTmdb) = ObtenerIdentidadTmdb(resultado);
         string url = ConstruirUrlCatalogo(idToken, contenidoId);
 
         var contenido = new Contenido
@@ -85,6 +77,19 @@ public class CatalogoService
 
         respuesta.EnsureSuccessStatusCode();
         return (contenidoId, true);
+    }
+
+    internal static (string ContenidoId, string TipoTmdb) ObtenerIdentidadTmdb(ResultadoTmdb resultado)
+    {
+        string tipoTmdb = resultado.Tipo switch
+        {
+            "pelicula" => "movie",
+            "serie" => "tv",
+            _ => throw new ArgumentException("Tipo de TMDB desconocido.", nameof(resultado))
+        };
+
+        string contenidoId = $"tmdb_{tipoTmdb}_{resultado.TmdbId}";
+        return (contenidoId, tipoTmdb);
     }
 
     public async Task EditarAsync(

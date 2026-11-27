@@ -1,4 +1,6 @@
-﻿using System.Net;
+using System.ComponentModel;
+using System.Globalization;
+using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
@@ -10,100 +12,256 @@ namespace FanVerse.Views;
 
 public partial class BuscarTmdbWindow : Window
 {
+    private static readonly CompareInfo ComparadorTitulos =
+        CultureInfo.GetCultureInfo("es-ES").CompareInfo;
+
+    private readonly CatalogoService _catalogo;
     private readonly TmdbService _tmdb = new();
+    private readonly string _idToken;
+    private readonly bool _soloCatalogo;
+    private readonly HashSet<string> _importados = new(StringComparer.Ordinal);
+    private Dictionary<string, Contenido>? _contenidos;
+    private bool _importando;
 
-    public BuscarTmdbWindow()
+    public string? ContenidoImportadoId { get; private set; }
+
+    public BuscarTmdbWindow(CatalogoService catalogo, string idToken, bool soloCatalogo)
     {
+        _catalogo = catalogo;
+        _idToken = idToken;
+        _soloCatalogo = soloCatalogo;
         InitializeComponent();
-    }
 
-    public ResultadoTmdb? ResultadoSeleccionado { get; private set; }
+        Title = soloCatalogo ? "Buscar en mi catálogo" : "Buscar en TMDB";
+        TituloVentanaTextBlock.Text = Title;
+        AyudaTextBlock.Text = soloCatalogo
+            ? "Películas y series guardadas en FanVerse."
+            : "Explora TMDB y añade títulos a FanVerse.";
 
-    private void Importar_Click(object sender, RoutedEventArgs e)
-    {
-        if (ResultadosListBox.SelectedItem is not ResultadoTmdb resultado)
+        if (soloCatalogo)
         {
-            EstadoTextBlock.Text = "Selecciona una película o serie para importar.";
-            return;
+            Loaded += async (_, _) => await BuscarAsync();
+        }
+        else
+        {
+            TipoComboBox.Items.Remove(TodosItem);
         }
 
-        ResultadoSeleccionado = resultado;
-        DialogResult = true;
+        TipoComboBox.SelectedIndex = 0;
+        ActualizarAccion();
     }
 
     private async void Buscar_Click(object sender, RoutedEventArgs e)
     {
+        await BuscarAsync();
+    }
+
+    private async Task BuscarAsync()
+    {
+        if (!BuscarButton.IsEnabled || _importando)
+        {
+            return;
+        }
+
         string consulta = ConsultaTextBox.Text.Trim();
 
-        if (consulta.Length == 0)
+        if (!_soloCatalogo && consulta.Length == 0)
         {
-            EstadoTextBlock.Text = "Escribe un título para buscar.";
+            EstadoTextBlock.Text = "Escribe un título para buscar en TMDB.";
             ConsultaTextBox.Focus();
             return;
         }
 
         if (TipoComboBox.SelectedValue is not string tipo)
         {
-            EstadoTextBlock.Text = "Selecciona película o serie.";
             return;
         }
 
         BuscarButton.IsEnabled = false;
         ResultadosListBox.ItemsSource = null;
-        EstadoTextBlock.Text = "Buscando en TMDB…";
+        EstadoTextBlock.Text = _soloCatalogo ? "Consultando FanVerse…" : "Buscando en TMDB…";
+
+        bool leyendoCatalogo = true;
 
         try
         {
-            var resultados = await _tmdb.BuscarAsync(consulta, tipo);
-            ResultadosListBox.ItemsSource = resultados;
+            _contenidos ??= await _catalogo.ObtenerAsync(_idToken);
+            leyendoCatalogo = false;
 
-            EstadoTextBlock.Text = resultados.Count == 0
-                ? "No se encontraron resultados."
-                : $"Resultados en esta página: {resultados.Count}";
+            List<FichaBusqueda> fichas;
+
+            if (_soloCatalogo)
+            {
+                fichas = _contenidos.Values
+                    .Where(contenido =>
+                        (tipo == "todos" || contenido.Tipo == tipo) &&
+                        (consulta.Length == 0 || ComparadorTitulos.IndexOf(
+                            contenido.Titulo ?? "", consulta,
+                            CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0))
+                    .OrderBy(contenido => contenido.Titulo, StringComparer.CurrentCultureIgnoreCase)
+                    .Select(contenido => new FichaBusqueda(
+                        contenido.Titulo, contenido.Tipo, contenido.Sinopsis, contenido.FechaEstreno,
+                        contenido.PosterUrl, contenido.Origen, null, null))
+                    .ToList();
+            }
+            else
+            {
+                var resultados = await _tmdb.BuscarAsync(consulta, tipo);
+                fichas = resultados.Select(resultado => new FichaBusqueda(
+                    resultado.Titulo, resultado.Tipo, resultado.Sinopsis, resultado.FechaEstreno,
+                    resultado.PosterUrl, "tmdb", resultado.Valoracion, resultado)).ToList();
+            }
+
+            ResultadosListBox.ItemsSource = fichas;
+            if (fichas.Count > 0)
+            {
+                ResultadosListBox.SelectedIndex = 0;
+            }
+
+            EstadoTextBlock.Text = fichas.Count == 0
+                ? "No se encontraron títulos."
+                : fichas.Count == 1 ? "1 título encontrado." : $"{fichas.Count} títulos encontrados.";
         }
         catch (InvalidOperationException ex)
         {
             EstadoTextBlock.Text = ex.Message;
         }
-        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+        catch (HttpRequestException ex) when (
+            ex.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
         {
-            EstadoTextBlock.Text = "TMDB rechazó el token. Revisa TMDB_READ_TOKEN.";
+            EstadoTextBlock.Text = leyendoCatalogo
+                ? "Firebase rechazó la lectura del catálogo. Comprueba la sesión."
+                : "TMDB rechazó el acceso. Revisa TMDB_READ_TOKEN.";
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex) when (
+            ex is HttpRequestException or TaskCanceledException or JsonException)
         {
-            EstadoTextBlock.Text = ex.StatusCode is { } estado
-                ? $"TMDB respondió con HTTP {(int)estado}."
-                : "No se pudo conectar con TMDB.";
-        }
-        catch (TaskCanceledException)
-        {
-            EstadoTextBlock.Text = "TMDB tardó demasiado. Vuelve a intentarlo.";
-        }
-        catch (JsonException)
-        {
-            EstadoTextBlock.Text = "La respuesta de TMDB tiene un formato inesperado.";
+            EstadoTextBlock.Text = leyendoCatalogo
+                ? "No se pudo consultar el catálogo. Pulsa Buscar para reintentar."
+                : "No se pudo completar la búsqueda en TMDB. Vuelve a intentarlo.";
         }
         finally
         {
             BuscarButton.IsEnabled = true;
+            ActualizarAccion();
         }
     }
 
-    private void ResultadosListBox_SelectionChanged(
-        object sender, SelectionChangedEventArgs e)
+    private void ResultadosListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (ResultadosListBox.SelectedItem is ResultadoTmdb resultado)
+        ActualizarAccion();
+    }
+
+    private bool EstaEnCatalogo(FichaBusqueda ficha)
+    {
+        if (ficha.ResultadoTmdb is not ResultadoTmdb resultado)
         {
-            TituloTextBlock.Text = resultado.Titulo;
-            FechaTextBlock.Text = resultado.FechaEstreno ?? "Fecha desconocida";
-            SinopsisTextBlock.Text = string.IsNullOrWhiteSpace(resultado.Sinopsis)
-                ? "Sin sinopsis disponible."
-                : resultado.Sinopsis;
+            return true;
+        }
+
+        string id = CatalogoService.ObtenerIdentidadTmdb(resultado).ContenidoId;
+        return _importados.Contains(id) || _contenidos?.ContainsKey(id) == true;
+    }
+
+    private void ActualizarAccion()
+    {
+        if (ImportarButton is null)
+        {
             return;
         }
 
-        TituloTextBlock.Text = "";
-        FechaTextBlock.Text = "";
-        SinopsisTextBlock.Text = "";
+        var ficha = ResultadosListBox.SelectedItem as FichaBusqueda;
+        bool guardado = ficha is not null && EstaEnCatalogo(ficha);
+
+        ImportarButton.Content = _importando
+            ? "Añadiendo…"
+            : guardado ? "En catálogo" : "Añadir al catálogo";
+        ImportarButton.IsEnabled = !_importando && ficha?.ResultadoTmdb is not null && !guardado;
+        MarcaCatalogoTextBlock.Text = guardado ? "Guardado en FanVerse" : "";
+    }
+
+    private async void Importar_Click(object sender, RoutedEventArgs e)
+    {
+        if (_importando ||
+            ResultadosListBox.SelectedItem is not FichaBusqueda ficha ||
+            ficha.ResultadoTmdb is not ResultadoTmdb resultado ||
+            EstaEnCatalogo(ficha))
+        {
+            return;
+        }
+
+        _importando = true;
+        BuscarButton.IsEnabled = false;
+        ResultadosListBox.IsEnabled = false;
+        ActualizarAccion();
+
+        try
+        {
+            var (contenidoId, creado) = await _catalogo.ImportarTmdbAsync(resultado, _idToken);
+            _importados.Add(contenidoId);
+            ContenidoImportadoId = contenidoId;
+            EstadoTextBlock.Text = creado
+                ? $"«{resultado.Titulo}» se añadió al catálogo."
+                : $"«{resultado.Titulo}» ya estaba en el catálogo.";
+        }
+        catch (HttpRequestException ex) when (
+            ex.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
+        {
+            EstadoTextBlock.Text = "Firebase rechazó el guardado. Comprueba el permiso de editor.";
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            EstadoTextBlock.Text = "No se pudo confirmar el guardado. Puedes volver a intentarlo.";
+        }
+        catch (InvalidOperationException ex)
+        {
+            EstadoTextBlock.Text = ex.Message;
+        }
+        finally
+        {
+            _importando = false;
+            BuscarButton.IsEnabled = true;
+            ResultadosListBox.IsEnabled = true;
+            ActualizarAccion();
+        }
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        base.OnClosing(e);
+
+        if (_importando)
+        {
+            e.Cancel = true;
+        }
+    }
+
+    private sealed record FichaBusqueda(
+        string Titulo,
+        string Tipo,
+        string? Sinopsis,
+        string? FechaEstreno,
+        Uri? PosterUrl,
+        string Origen,
+        double? Valoracion,
+        ResultadoTmdb? ResultadoTmdb)
+    {
+        public string TipoTexto => Tipo switch
+        {
+            "pelicula" => "Película",
+            "serie" => "Serie",
+            _ => "Tipo sin especificar"
+        };
+
+        public string OrigenTexto => Origen switch
+        {
+            "tmdb" => "TMDB",
+            "manual" => "Alta manual",
+            _ => "Sin especificar"
+        };
+
+        public string FechaTexto => string.IsNullOrWhiteSpace(FechaEstreno) ? "Sin fecha" : FechaEstreno;
+        public string SinopsisTexto => string.IsNullOrWhiteSpace(Sinopsis) ? "Sin sinopsis disponible." : Sinopsis;
+        public string? NotaTexto => Valoracion is double nota ? $"Valoración TMDB · {nota:0.0}/10" : null;
     }
 }

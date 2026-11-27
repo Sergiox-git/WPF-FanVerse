@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Style="{StaticResource VentanaFanVerse}"
         Title="Buscar en TMDB"
-        Width="970" Height="640" MinWidth="700" MinHeight="510"
+        Width="1040" Height="700" MinWidth="730" MinHeight="520"
         WindowStartupLocation="CenterOwner"
         FocusManager.FocusedElement="{Binding ElementName=ConsultaTextBox}">
 
@@ -49,8 +49,10 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Buscar en TMDB" Style="{StaticResource TituloDialogo}"
-                   Margin="0,0,0,16"/>
+        <StackPanel Margin="0,0,0,16">
+            <TextBlock x:Name="TituloVentanaTextBlock" Style="{StaticResource TituloDialogo}" Margin="0,0,0,5"/>
+            <TextBlock x:Name="AyudaTextBlock" Foreground="{StaticResource MarfilBrush}" TextWrapping="Wrap"/>
+        </StackPanel>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
@@ -60,15 +62,16 @@
             </Grid.ColumnDefinitions>
 
             <ComboBox x:Name="TipoComboBox" Style="{StaticResource SelectorDialogo}"
-                      SelectedIndex="0" SelectedValuePath="Tag"
+                      SelectedValuePath="Tag"
                       AutomationProperties.Name="Tipo de contenido">
+                <ComboBoxItem x:Name="TodosItem" Content="Todos" Tag="todos"/>
                 <ComboBoxItem Content="Película" Tag="pelicula"/>
                 <ComboBoxItem Content="Serie" Tag="serie"/>
             </ComboBox>
 
             <TextBox x:Name="ConsultaTextBox" Grid.Column="1"
                      Style="{StaticResource TextoDialogo}" Margin="10,0"
-                     AutomationProperties.Name="Título que quieres buscar"/>
+                     MaxLength="200" AutomationProperties.Name="Título que quieres buscar"/>
 
             <Button x:Name="BuscarButton" Grid.Column="2" Content="Buscar"
                     Style="{StaticResource BotonPrincipalDialogo}"
@@ -83,7 +86,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="14"/>
-                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="330"/>
             </Grid.ColumnDefinitions>
 
             <ListBox x:Name="ResultadosListBox"
@@ -92,7 +95,7 @@
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                      SelectionChanged="ResultadosListBox_SelectionChanged"
-                     AutomationProperties.Name="Resultados de TMDB">
+                     AutomationProperties.Name="Resultados de búsqueda">
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel/>
@@ -100,15 +103,10 @@
                 </ListBox.ItemsPanel>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Width="106" ToolTip="{Binding Titulo}"
+                        <StackPanel Width="156" ToolTip="{Binding Titulo}"
                                     AutomationProperties.Name="{Binding Titulo}">
-                            <Grid Height="159" Background="{StaticResource CarbonBrush}"
-                                  ClipToBounds="True">
-                                <TextBlock Text="Sin carátula" FontSize="11"
-                                           Foreground="{StaticResource MarfilBrush}"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                <Image Source="{Binding PosterUrl}" Stretch="UniformToFill"/>
-                            </Grid>
+                            <ContentPresenter Content="{Binding}"
+                                              ContentTemplate="{StaticResource PortadaFanVerse}"/>
                             <TextBlock Text="{Binding Titulo}" FontWeight="SemiBold"
                                        TextTrimming="CharacterEllipsis" Margin="0,7,0,2"/>
                         </StackPanel>
@@ -116,15 +114,14 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <Border Grid.Column="2" Style="{StaticResource SuperficieDialogo}" Padding="16">
+            <Border Grid.Column="2" Style="{StaticResource SuperficieDialogo}" Padding="20">
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
                     <StackPanel>
-                        <TextBlock Text="Vista previa" FontSize="18" FontWeight="SemiBold"
-                                   Margin="0,0,0,10"/>
+                        <TextBlock Text="Ficha del título" FontSize="18" FontWeight="SemiBold"
+                                   Margin="0,0,0,12"/>
 
-                        <TextBlock Text="Selecciona una ficha para ver su sinopsis."
-                                   Foreground="{StaticResource MarfilBrush}" TextWrapping="Wrap">
+                        <TextBlock Text="Selecciona un resultado para ver su ficha." TextWrapping="Wrap">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -138,48 +135,48 @@
                             </TextBlock.Style>
                         </TextBlock>
 
-                        <StackPanel>
+                        <StackPanel DataContext="{Binding SelectedItem, ElementName=ResultadosListBox}">
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedItem, ElementName=ResultadosListBox}"
-                                                     Value="{x:Null}">
+                                        <DataTrigger Binding="{Binding}" Value="{x:Null}">
                                             <Setter Property="Visibility" Value="Collapsed"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </StackPanel.Style>
 
-                            <Grid Width="100" Height="150" HorizontalAlignment="Left"
-                                  Background="{StaticResource CarbonBrush}" ClipToBounds="True">
-                                <TextBlock Text="Sin carátula" FontSize="11"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                <Image Source="{Binding SelectedItem.PosterUrl, ElementName=ResultadosListBox}"
-                                       Stretch="UniformToFill"/>
-                            </Grid>
-                            <TextBlock x:Name="TituloTextBlock" FontSize="20" FontWeight="SemiBold"
-                                       TextWrapping="Wrap" Margin="0,12,0,0"/>
-                            <TextBlock x:Name="FechaTextBlock"
-                                       Foreground="{StaticResource AmarilloBrush}" Margin="0,4,0,8"/>
-                            <TextBlock x:Name="SinopsisTextBlock" TextWrapping="Wrap"/>
+                            <ContentPresenter Content="{Binding}"
+                                              ContentTemplate="{StaticResource PortadaFanVerse}"/>
+                            <TextBlock Text="{Binding Titulo}" FontSize="22" FontWeight="SemiBold"
+                                       TextWrapping="Wrap" Margin="0,14,0,6"/>
+                            <WrapPanel>
+                                <TextBlock Text="{Binding TipoTexto}" Margin="0,0,8,4"/>
+                                <TextBlock Text="·" Margin="0,0,8,4"/>
+                                <TextBlock Text="{Binding FechaTexto}" Margin="0,0,0,4"/>
+                            </WrapPanel>
+                            <TextBlock Text="{Binding OrigenTexto, StringFormat=Origen: {0}}"
+                                       Margin="0,4,0,0"/>
+                            <TextBlock Text="{Binding NotaTexto}" Foreground="{StaticResource AmarilloBrush}"/>
+                            <TextBlock Text="Sinopsis" FontWeight="SemiBold" Margin="0,14,0,5"/>
+                            <TextBlock Text="{Binding SinopsisTexto}" TextWrapping="Wrap"/>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
         </Grid>
 
-        <Button Grid.Row="4" Content="Importar al catálogo"
-                HorizontalAlignment="Right" Margin="0,14,0,0" Click="Importar_Click">
-            <Button.Style>
-                <Style TargetType="Button" BasedOn="{StaticResource BotonPrincipalDialogo}">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding SelectedItem, ElementName=ResultadosListBox}"
-                                     Value="{x:Null}">
-                            <Setter Property="IsEnabled" Value="False"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Button.Style>
-        </Button>
+        <DockPanel Grid.Row="4" Margin="0,14,0,0">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="Cerrar" Style="{StaticResource BotonDialogo}"
+                        IsCancel="True" Margin="0,0,8,0"/>
+                <Button x:Name="ImportarButton" Content="Añadir al catálogo"
+                        Style="{StaticResource BotonPrincipalDialogo}"
+                        IsEnabled="False" Click="Importar_Click"/>
+            </StackPanel>
+            <TextBlock x:Name="MarcaCatalogoTextBlock" Style="{StaticResource EstadoDialogo}"
+                       AutomationProperties.LiveSetting="Polite" VerticalAlignment="Center"
+                       Margin="0,0,8,0"/>
+        </DockPanel>
     </Grid>
 </Window>

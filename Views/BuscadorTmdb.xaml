@@ -1,0 +1,55 @@
+<UserControl x:Class="FanVerse.Views.BuscadorTmdb"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="VisibilidadResultados"/>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <Grid MaxWidth="760" HorizontalAlignment="Left"
+              Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=UserControl}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="128"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <ComboBox x:Name="TipoComboBox"
+                      SelectedIndex="0"
+                      SelectedValuePath="Tag"
+                      Style="{StaticResource SelectorDialogo}"
+                      AutomationProperties.Name="Tipo de contenido">
+                <ComboBoxItem Content="Película" Tag="pelicula"/>
+                <ComboBoxItem Content="Serie" Tag="serie"/>
+            </ComboBox>
+
+            <TextBox x:Name="ConsultaTextBox"
+                     Grid.Column="1"
+                     Margin="8,0"
+                     MaxLength="200"
+                     Style="{StaticResource TextoDialogo}"
+                     AutomationProperties.Name="Título para buscar en TMDB"
+                     KeyDown="Consulta_KeyDown"/>
+
+            <Button x:Name="BuscarButton"
+                    Grid.Column="2"
+                    Content="Buscar"
+                    Style="{StaticResource BotonPrincipalDialogo}"
+                    Click="Buscar_Click"/>
+        </Grid>
+
+        <TextBlock x:Name="EstadoTextBlock"
+                   Style="{StaticResource EstadoDialogo}"
+                   Margin="0,6,0,0"/>
+
+        <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Disabled"
+                      Visibility="{Binding HasItems, ElementName=Resultados,
+                                           Converter={StaticResource VisibilidadResultados}}"
+                      Margin="0,8,0,0">
+            <ItemsControl x:Name="Resultados"
+                          ItemsPanel="{DynamicResource FilaTmdb}"
+                          ItemTemplate="{DynamicResource TarjetaTmdb}"/>
+        </ScrollViewer>
+    </StackPanel>
+</UserControl>
