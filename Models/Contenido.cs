@@ -16,4 +16,19 @@ public class Contenido
     [JsonPropertyName("origen")]
     public string Origen { get; init; } = "";
 
+    [JsonPropertyName("tmdbId")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? TmdbId { get; init; }
+
+    [JsonPropertyName("tipoTmdb")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? TipoTmdb { get; init; }
+
+    [JsonPropertyName("fechaEstreno")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? FechaEstreno { get; init; }
+
+    [JsonPropertyName("posterPath")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? PosterPath { get; init; }
 }

@@ -174,6 +174,59 @@ namespace FanVerse
             }
         }
 
+        private async void BuscarTmdb_Click(object sender, RoutedEventArgs e)
+        {
+            var ventana = new BuscarTmdbWindow
+            {
+                Owner = this
+            };
+
+            if (ventana.ShowDialog() != true ||
+                ventana.ResultadoSeleccionado is not ResultadoTmdb resultado)
+            {
+                return;
+            }
+
+            var boton = (System.Windows.Controls.Button)sender;
+            boton.IsEnabled = false;
+            EstadoCatalogoTextBlock.Text = "Importando desde TMDB…";
+
+            try
+            {
+                var (contenidoId, creado) =
+                    await _catalogo.ImportarTmdbAsync(resultado, _sesion.IdToken);
+
+                await CargarCatalogoAsync(contenidoId);
+
+                if (CatalogoListBox.SelectedValue is string idSeleccionado &&
+                    idSeleccionado == contenidoId)
+                {
+                    EstadoCatalogoTextBlock.Text = creado
+                        ? "Contenido importado."
+                        : "Este contenido ya estaba en el catálogo.";
+                }
+            }
+            catch (HttpRequestException ex) when (
+                ex.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
+            {
+                EstadoCatalogoTextBlock.Text =
+                    "Firebase rechazó la importación. Revisa la sesión, el permiso de editor y las reglas.";
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+            {
+                EstadoCatalogoTextBlock.Text =
+                    "No se pudo confirmar la importación. Vuelve a cargar el catálogo para comprobarlo.";
+            }
+            catch (InvalidOperationException ex)
+            {
+                EstadoCatalogoTextBlock.Text = ex.Message;
+            }
+            finally
+            {
+                boton.IsEnabled = true;
+            }
+        }
+
         private void Resenas_Click(object sender, RoutedEventArgs e)
         {
             MainTabs.SelectedIndex = 2;

@@ -204,6 +204,13 @@
                                        HorizontalAlignment="Left"
                                        Click="EliminarContenido_Click"/>
 
+                            <Button Content="Buscar en TMDB"
+                                    Width="220"
+                                    Height="42"
+                                    Margin="0,8,0,0"
+                                    HorizontalAlignment="Left"
+                                    Click="BuscarTmdb_Click"/>
+
                             <TextBlock x:Name="EstadoCatalogoTextBlock"
                                         Foreground="{StaticResource MarfilBrush}"
                                         Margin="0,12,0,6"

@@ -1,6 +1,8 @@
-﻿using System.Net.Http;
+﻿using FanVerse.Models;
+using System.Net;
+using System.Net.Http;
 using System.Net.Http.Json;
-using FanVerse.Models;
+using System.Net;
 
 namespace FanVerse.Services;
 
@@ -42,6 +44,49 @@ public class CatalogoService
 
         return alta.Name;
     }
+
+    public async Task<(string ContenidoId, bool Creado)> ImportarTmdbAsync(
+    ResultadoTmdb resultado, string idToken)
+    {
+        string tipoTmdb = resultado.Tipo switch
+        {
+            "pelicula" => "movie",
+            "serie" => "tv",
+            _ => throw new ArgumentException("Tipo de TMDB desconocido.", nameof(resultado))
+        };
+
+        string contenidoId = $"tmdb_{tipoTmdb}_{resultado.TmdbId}";
+        string url = ConstruirUrlCatalogo(idToken, contenidoId);
+
+        var contenido = new Contenido
+        {
+            Titulo = resultado.Titulo,
+            Tipo = resultado.Tipo,
+            Sinopsis = resultado.Sinopsis,
+            Origen = "tmdb",
+            TmdbId = resultado.TmdbId,
+            TipoTmdb = tipoTmdb,
+            FechaEstreno = resultado.FechaEstreno,
+            PosterPath = resultado.PosterPath
+        };
+
+        using var peticion = new HttpRequestMessage(HttpMethod.Put, url)
+        {
+            Content = JsonContent.Create(contenido)
+        };
+        peticion.Headers.TryAddWithoutValidation("If-Match", "null_etag");
+
+        using HttpResponseMessage respuesta = await Cliente.SendAsync(peticion);
+
+        if (respuesta.StatusCode == HttpStatusCode.PreconditionFailed)
+        {
+            return (contenidoId, false);
+        }
+
+        respuesta.EnsureSuccessStatusCode();
+        return (contenidoId, true);
+    }
+
     public async Task EditarAsync(
     string contenidoId, Contenido contenido, string idToken)
     {
