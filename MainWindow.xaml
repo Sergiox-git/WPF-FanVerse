@@ -186,7 +186,8 @@
                                     Height="42"
                                     HorizontalAlignment="Left"
                                     Background="{StaticResource RojoBrush}"
-                                    Foreground="White"/>
+                                    Foreground="White"
+                                    Click="AnadirContenido_Click"/>
 
                             <TextBlock x:Name="EstadoCatalogoTextBlock"
                                         Foreground="{StaticResource MarfilBrush}"

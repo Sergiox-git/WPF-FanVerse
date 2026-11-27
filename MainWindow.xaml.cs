@@ -1,18 +1,18 @@
-﻿
+﻿using System.Net;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using FanVerse.Models;
-using System.Net;
-using System.Net.Http;
-using System.Text.Json;
 using FanVerse.Services;
+using FanVerse.Views;
 
 namespace FanVerse
 {
     public partial class MainWindow : Window
     {
         private readonly SesionUsuario _sesion;
-
         private readonly CatalogoService _catalogo = new();
 
         public MainWindow(SesionUsuario sesion)
@@ -21,7 +21,6 @@ namespace FanVerse
             InitializeComponent();
             ActualizarMenu();
         }
-
 
         private void Inicio_Click(object sender, RoutedEventArgs e)
         {
@@ -34,6 +33,11 @@ namespace FanVerse
             MainTabs.SelectedIndex = 1;
             ActualizarMenu();
 
+            await CargarCatalogoAsync();
+        }
+
+        private async Task CargarCatalogoAsync(string? contenidoId = null)
+        {
             BtnCatalogo.IsEnabled = false;
             EstadoCatalogoTextBlock.Text = "Cargando catálogo…";
 
@@ -41,6 +45,13 @@ namespace FanVerse
             {
                 var contenidos = await _catalogo.ObtenerAsync(_sesion.IdToken);
                 CatalogoListBox.ItemsSource = contenidos;
+
+                // Después de un alta, seleccionamos el registro por su ID.
+                if (contenidoId is not null)
+                {
+                    CatalogoListBox.SelectedValue = contenidoId;
+                }
+
                 EstadoCatalogoTextBlock.Text = contenidos.Count == 0
                     ? "El catálogo está vacío."
                     : $"Títulos encontrados: {contenidos.Count}";
@@ -63,15 +74,31 @@ namespace FanVerse
             }
             catch (TaskCanceledException)
             {
-                EstadoCatalogoTextBlock.Text = "Firebase tardó demasiado. Vuelve a intentarlo.";
+                EstadoCatalogoTextBlock.Text =
+                    "Firebase tardó demasiado. Vuelve a intentarlo.";
             }
             catch (JsonException)
             {
-                EstadoCatalogoTextBlock.Text = "La respuesta de Firebase no tiene el formato esperado.";
+                EstadoCatalogoTextBlock.Text =
+                    "La respuesta de Firebase no tiene el formato esperado.";
             }
             finally
             {
                 BtnCatalogo.IsEnabled = true;
+            }
+        }
+
+        private async void AnadirContenido_Click(object sender, RoutedEventArgs e)
+        {
+            var ventana = new AltaContenidoWindow(_catalogo, _sesion.IdToken)
+            {
+                Owner = this
+            };
+
+            // El formulario devuelve true cuando Firebase confirma el alta.
+            if (ventana.ShowDialog() == true)
+            {
+                await CargarCatalogoAsync(ventana.ContenidoId);
             }
         }
 
@@ -83,30 +110,22 @@ namespace FanVerse
 
         private void ActualizarMenu()
         {
-            // Quitamos la selección de todos los botones
             BtnInicio.Background = Brushes.Transparent;
             BtnCatalogo.Background = Brushes.Transparent;
             BtnResenas.Background = Brushes.Transparent;
 
-            // Destacamos el botón seleccionado
             switch (MainTabs.SelectedIndex)
             {
                 case 0:
-                    BtnInicio.Background =
-                        (Brush)FindResource("RojoBrush");
+                    BtnInicio.Background = (Brush)FindResource("RojoBrush");
                     break;
-
                 case 1:
-                    BtnCatalogo.Background =
-                        (Brush)FindResource("RojoBrush");
+                    BtnCatalogo.Background = (Brush)FindResource("RojoBrush");
                     break;
-
                 case 2:
-                    BtnResenas.Background =
-                        (Brush)FindResource("RojoBrush");
+                    BtnResenas.Background = (Brush)FindResource("RojoBrush");
                     break;
             }
         }
-
     }
 }
