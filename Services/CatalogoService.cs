@@ -21,7 +21,7 @@ public class CatalogoService
                 "Configura FIREBASE_DB_URL antes de iniciar FanVerse.");
         }
 
-        string url = $"{urlBase.TrimEnd('/')}/catalogo.json"
+        string url = $"{urlBase.Trim().TrimEnd('/')}/catalogo.json"
             + $"?auth={Uri.EscapeDataString(idToken)}";
 
         using HttpResponseMessage respuesta = await Cliente.GetAsync(url);
