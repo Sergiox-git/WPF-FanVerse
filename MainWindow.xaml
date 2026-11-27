@@ -188,6 +188,16 @@
                                     Background="{StaticResource RojoBrush}"
                                     Foreground="White"/>
 
+                            <TextBlock x:Name="EstadoCatalogoTextBlock"
+                                        Foreground="{StaticResource MarfilBrush}"
+                                        Margin="0,12,0,6"
+                                        TextWrapping="Wrap" />
+
+                            <ListBox x:Name="CatalogoListBox"
+                                        DisplayMemberPath="Value.Titulo"
+                                        SelectedValuePath="Key"
+                                        MaxHeight="320" />
+
                         </StackPanel>
 
                     </Grid>

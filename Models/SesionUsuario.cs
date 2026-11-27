@@ -1,14 +1,18 @@
-﻿
-namespace FanVerse.Models
+﻿using System.Text.Json.Serialization;
+
+namespace FanVerse.Models;
+
+public class SesionUsuario
 {
-    public class SesionUsuario
-    {
-        public string uis { get; set; } = "";
+    [JsonPropertyName("localId")]
+    public string Uid { get; init; } = "";
 
-        public string email { get; set; } = "";
+    [JsonPropertyName("email")]
+    public string Email { get; init; } = "";
 
-        public string idToken { get; set; } = "";
+    [JsonPropertyName("idToken")]
+    public string IdToken { get; init; } = "";
 
-        public string refreshToken { get; set; } = "";
-    }
+    [JsonPropertyName("refreshToken")]
+    public string RefreshToken { get; init; } = "";
 }
