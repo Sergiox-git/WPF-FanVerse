@@ -252,5 +252,15 @@ namespace FanVerse
                     break;
             }
         }
+
+        private void Creditos_Click(object sender, RoutedEventArgs e)
+        {
+            var ventana = new CreditosWindow
+            {
+                Owner = this
+            };
+
+            ventana.ShowDialog();
+        }
     }
 }

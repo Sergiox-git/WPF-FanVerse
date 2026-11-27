@@ -83,6 +83,11 @@
                             Style="{StaticResource SidebarButtonStyle}"
                             Click="Resenas_Click"/>
 
+                    <Button Content="Créditos"
+                            Style="{StaticResource SidebarButtonStyle}"
+                            Click="Creditos_Click"/>
+                    
+
                 </StackPanel>
 
             </DockPanel>
@@ -252,6 +257,7 @@
                                     HorizontalAlignment="Left"
                                     Background="{StaticResource RojoBrush}"
                                     Foreground="White"/>
+
 
                         </StackPanel>
 

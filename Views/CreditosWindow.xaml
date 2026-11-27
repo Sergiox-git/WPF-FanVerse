@@ -1,0 +1,24 @@
+﻿<Window x:Class="FanVerse.Views.CreditosWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Créditos de FanVerse"
+        Width="420"
+        SizeToContent="Height"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner">
+    <StackPanel Margin="24">
+        <TextBlock Text="Créditos"
+                   FontSize="22"
+                   FontWeight="Bold"/>
+
+        <Image Source="/Assets/Images/tmdb_logo.png"
+               Width="200"
+               Height="80"
+               Stretch="Uniform"
+               HorizontalAlignment="Left"
+               Margin="0,16,0,10"/>
+
+        <TextBlock Text="This product uses the TMDB API but is not endorsed or certified by TMDB."
+                   TextWrapping="Wrap"/>
+    </StackPanel>
+</Window>
