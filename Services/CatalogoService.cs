@@ -62,6 +62,16 @@ public class CatalogoService
         respuesta.EnsureSuccessStatusCode();
     }
 
+    public async Task EliminarAsync(string contenidoId, string idToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(contenidoId);
+
+        string url = ConstruirUrlCatalogo(idToken, contenidoId);
+
+        using HttpResponseMessage respuesta = await Cliente.DeleteAsync(url);
+        respuesta.EnsureSuccessStatusCode();
+    }
+
     private sealed class AltaCatalogoRespuesta
     {
         public string? Name { get; init; }

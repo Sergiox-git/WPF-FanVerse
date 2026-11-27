@@ -124,6 +124,56 @@ namespace FanVerse
             }
         }
 
+        private async void EliminarContenido_Click(object sender, RoutedEventArgs e)
+        {
+            if (CatalogoListBox.SelectedItem is not KeyValuePair<string, Contenido> seleccionado)
+            {
+                EstadoCatalogoTextBlock.Text = "Selecciona una película o serie para eliminar.";
+                return;
+            }
+
+            MessageBoxResult confirmacion = MessageBox.Show(
+                this,
+                $"¿Quieres eliminar «{seleccionado.Value.Titulo}» del catálogo?",
+                "Confirmar eliminación",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning,
+                MessageBoxResult.No);
+
+            if (confirmacion != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            EliminarContenidoButton.IsEnabled = false;
+            EstadoCatalogoTextBlock.Text = "Eliminando contenido…";
+
+            try
+            {
+                await _catalogo.EliminarAsync(seleccionado.Key, _sesion.IdToken);
+                await CargarCatalogoAsync();
+            }
+            catch (HttpRequestException ex) when (
+                ex.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
+            {
+                EstadoCatalogoTextBlock.Text =
+                    "Firebase denegó el borrado. Comprueba la sesión y el permiso de editor.";
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+            {
+                EstadoCatalogoTextBlock.Text =
+                    "No se pudo confirmar el borrado. Vuelve a cargar el catálogo para comprobarlo.";
+            }
+            catch (InvalidOperationException ex)
+            {
+                EstadoCatalogoTextBlock.Text = ex.Message;
+            }
+            finally
+            {
+                EliminarContenidoButton.IsEnabled = true;
+            }
+        }
+
         private void Resenas_Click(object sender, RoutedEventArgs e)
         {
             MainTabs.SelectedIndex = 2;
