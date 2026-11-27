@@ -13,6 +13,7 @@ public partial class AltaContenidoWindow : Window
 {
     private readonly CatalogoService _catalogo;
     private readonly string _idToken;
+    private readonly string? _contenidoIdEdicion;
     private bool _guardando;
 
     public string? ContenidoId { get; private set; }
@@ -22,6 +23,21 @@ public partial class AltaContenidoWindow : Window
         InitializeComponent();
         _catalogo = catalogo;
         _idToken = idToken;
+    }
+
+    public AltaContenidoWindow(
+    CatalogoService catalogo,
+    string idToken,
+    string contenidoId,
+    Contenido contenido)
+    : this(catalogo, idToken)
+    {
+        _contenidoIdEdicion = contenidoId;
+        Title = "Editar película o serie";
+
+        TituloTextBox.Text = contenido.Titulo;
+        TipoComboBox.SelectedValue = contenido.Tipo;
+        SinopsisTextBox.Text = contenido.Sinopsis;
     }
 
     private async void Guardar_Click(object sender, RoutedEventArgs e)
@@ -56,7 +72,15 @@ public partial class AltaContenidoWindow : Window
 
         try
         {
-            ContenidoId = await _catalogo.CrearAsync(contenido, _idToken);
+            if (_contenidoIdEdicion is null)
+            {
+                ContenidoId = await _catalogo.CrearAsync(contenido, _idToken);
+            }
+            else
+            {
+                await _catalogo.EditarAsync(_contenidoIdEdicion, contenido, _idToken);
+                ContenidoId = _contenidoIdEdicion;
+            }
         }
         catch (HttpRequestException ex) when (
             ex.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)

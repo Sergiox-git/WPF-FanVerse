@@ -42,13 +42,33 @@ public class CatalogoService
 
         return alta.Name;
     }
+    public async Task EditarAsync(
+    string contenidoId, Contenido contenido, string idToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(contenidoId);
+
+        string url = ConstruirUrlCatalogo(idToken, contenidoId);
+
+        var cambios = new
+        {
+            titulo = contenido.Titulo,
+            tipo = contenido.Tipo,
+            sinopsis = contenido.Sinopsis
+        };
+
+        using HttpResponseMessage respuesta =
+            await Cliente.PatchAsJsonAsync(url, cambios);
+
+        respuesta.EnsureSuccessStatusCode();
+    }
 
     private sealed class AltaCatalogoRespuesta
     {
         public string? Name { get; init; }
     }
 
-    private static string ConstruirUrlCatalogo(string idToken)
+    private static string ConstruirUrlCatalogo(
+        string idToken, string? contenidoId = null)
     {
         string? urlBase = Environment.GetEnvironmentVariable("FIREBASE_DB_URL");
 
@@ -58,7 +78,11 @@ public class CatalogoService
                 "Configura FIREBASE_DB_URL antes de iniciar FanVerse.");
         }
 
-        return $"{urlBase.Trim().TrimEnd('/')}/catalogo.json"
+        string ruta = contenidoId is null
+            ? "catalogo"
+            : $"catalogo/{Uri.EscapeDataString(contenidoId)}";
+
+        return $"{urlBase.Trim().TrimEnd('/')}/{ruta}.json"
             + $"?auth={Uri.EscapeDataString(idToken)}";
     }
 }

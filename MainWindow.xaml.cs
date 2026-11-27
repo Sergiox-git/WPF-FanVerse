@@ -101,6 +101,28 @@ namespace FanVerse
                 await CargarCatalogoAsync(ventana.ContenidoId);
             }
         }
+        private async void EditarContenido_Click(object sender, RoutedEventArgs e)
+        {
+            if (CatalogoListBox.SelectedItem is not KeyValuePair<string, Contenido> seleccionado)
+            {
+                EstadoCatalogoTextBlock.Text = "Selecciona una película o serie para editar.";
+                return;
+            }
+
+            var ventana = new AltaContenidoWindow(
+                _catalogo,
+                _sesion.IdToken,
+                seleccionado.Key,
+                seleccionado.Value)
+            {
+                Owner = this
+            };
+
+            if (ventana.ShowDialog() == true)
+            {
+                await CargarCatalogoAsync(seleccionado.Key);
+            }
+        }
 
         private void Resenas_Click(object sender, RoutedEventArgs e)
         {
