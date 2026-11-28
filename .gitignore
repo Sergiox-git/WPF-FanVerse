@@ -14,3 +14,4 @@ obj/
 # Configuración sensible
 .env
 secrets.json
+Properties/launchSettings.json

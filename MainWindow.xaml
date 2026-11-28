@@ -1,4 +1,4 @@
-﻿<Window x:Class="FanVerse.MainWindow"
+<Window x:Class="FanVerse.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="FanVerse"
@@ -204,31 +204,109 @@
 
                 </TabItem>
 
-                <!-- RESEÑAS PÚBLICAS -->
+                <!-- MIS RESEÑAS -->
                 <TabItem Header="Reseñas">
 
                     <Grid Background="{StaticResource CarbonBrush}"
                           Margin="20">
 
-                        <StackPanel>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="320"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="RESEÑAS DE LA COMUNIDAD"
+                        <!-- COLUMNA IZQUIERDA: FORMULARIO -->
+                        <StackPanel Grid.Column="0" Margin="0,0,20,0">
+
+                            <TextBlock Text="MIS RESEÑAS"
                                        FontSize="30"
                                        FontWeight="Bold"
                                        Foreground="{StaticResource MarfilBrush}"
                                        Margin="0,0,0,10"/>
 
-                            <TextBlock Text="Descubre las opiniones de otros usuarios."
-                                       FontSize="16"
+                            <TextBlock Text="Tus valoraciones privadas de películas y series."
+                                       FontSize="14"
                                        Foreground="{StaticResource MarfilBrush}"
-                                       Margin="0,0,0,30"/>
+                                       TextWrapping="Wrap"
+                                       Margin="0,0,0,20"/>
 
-                            <Button Content="+ Escribir reseña"
-                                    Width="180"
-                                    Height="42"
-                                    HorizontalAlignment="Left"
-                                    Background="{StaticResource RojoBrush}"
-                                    Foreground="White"/>
+                            <TextBlock Text="Contenido"
+                                       Foreground="{StaticResource MarfilBrush}"
+                                       Margin="0,0,0,4"/>
+                            <ComboBox x:Name="ContenidoComboBox"
+                                      DisplayMemberPath="Value.Titulo"
+                                      SelectedValuePath="Key"
+                                      Height="32"
+                                      Margin="0,0,0,12"/>
+
+                            <TextBlock Text="Puntuación (1-10)"
+                                       Foreground="{StaticResource MarfilBrush}"
+                                       Margin="0,0,0,4"/>
+                            <TextBox x:Name="PuntuacionTextBox"
+                                     Height="32"
+                                     Margin="0,0,0,12"/>
+
+                            <TextBlock Text="Comentario"
+                                       Foreground="{StaticResource MarfilBrush}"
+                                       Margin="0,0,0,4"/>
+                            <TextBox x:Name="ComentarioTextBox"
+                                     Height="100"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     VerticalScrollBarVisibility="Auto"
+                                     Margin="0,0,0,12"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Button x:Name="BtnNuevaResena"
+                                        Content="Nuevo"
+                                        Width="90" Height="36"
+                                        Margin="0,0,8,0"
+                                        Click="NuevaResena_Click"/>
+                                <Button x:Name="BtnGuardarResena"
+                                        Content="Guardar"
+                                        Width="90" Height="36"
+                                        Margin="0,0,8,0"
+                                        Background="{StaticResource RojoBrush}"
+                                        Foreground="White"
+                                        Click="GuardarResena_Click"/>
+                                <Button x:Name="BtnEliminarResena"
+                                        Content="Eliminar"
+                                        Width="90" Height="36"
+                                        Click="EliminarResena_Click"/>
+                            </StackPanel>
+
+                            <TextBlock x:Name="EstadoResenaTextBlock"
+                                       Foreground="{StaticResource AmarilloBrush}"
+                                       TextWrapping="Wrap"/>
+
+                        </StackPanel>
+
+                        <!-- COLUMNA DERECHA: LISTA -->
+                        <StackPanel Grid.Column="1">
+
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="LISTA DE MIS RESEÑAS"
+                                           FontSize="18"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource MarfilBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,16,0"/>
+                                <Button x:Name="BtnActualizarResenas"
+                                        Content="Actualizar"
+                                        Width="100" Height="30"
+                                        Click="ActualizarResenas_Click"/>
+                            </StackPanel>
+
+                            <TextBlock x:Name="EstadoListaResenasTextBlock"
+                                       Foreground="{StaticResource MarfilBrush}"
+                                       Margin="0,0,0,8"
+                                       TextWrapping="Wrap"/>
+
+                            <ListBox x:Name="MisResenasListBox"
+                                     MaxHeight="420"
+                                     DisplayMemberPath="Value.TituloAlCrear"
+                                     SelectedValuePath="Key"
+                                     SelectionChanged="MisResenasListBox_SelectionChanged"/>
 
                         </StackPanel>
 
