@@ -11,11 +11,13 @@
   <ItemGroup>
     <None Remove="Assets\Images\logo.png" />
     <None Remove="Assets\Images\logo_blanco.png" />
+    <None Remove="Assets\Images\tmdb_logo.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Assets\Images\logo.png" />
     <Resource Include="Assets\Images\logo_blanco.png" />
+    <Resource Include="Assets\Images\tmdb_logo.png" />
   </ItemGroup>
 
 </Project>

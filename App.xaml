@@ -1,4 +1,4 @@
-﻿<Application x:Class="FanVerse.App"
+<Application x:Class="FanVerse.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="Views/LoginWindow.xaml">
@@ -11,6 +11,10 @@
 
                 <ResourceDictionary Source="Styles/Buttons.xaml"/>
 
+                <ResourceDictionary Source="Styles/Dialogos.xaml"/>
+
+                <ResourceDictionary Source="Styles/Ventanas.xaml"/>
+                <ResourceDictionary Source="Styles/Desplazamiento.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

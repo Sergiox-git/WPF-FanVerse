@@ -1,0 +1,43 @@
+<Window x:Class="FanVerse.Views.RegistroWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Style="{StaticResource VentanaFanVerse}"
+        Title="Crear cuenta"
+        Width="520" SizeToContent="Height" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        FocusManager.FocusedElement="{Binding ElementName=CorreoTextBox}">
+    <Border Style="{StaticResource SuperficieDialogo}" Margin="20" Padding="24">
+        <StackPanel>
+            <TextBlock Text="Crear cuenta de FanVerse" Style="{StaticResource TituloDialogo}"
+                       Margin="0,0,0,20"/>
+
+            <StackPanel x:Name="CamposRegistro">
+                <Label Content="_Correo electrónico" Style="{StaticResource EtiquetaCampoDialogo}"
+                       Target="{Binding ElementName=CorreoTextBox}"/>
+                <TextBox x:Name="CorreoTextBox" Style="{StaticResource TextoDialogo}"
+                         Margin="0,0,0,14"/>
+
+                <Label Content="C_ontraseña" Style="{StaticResource EtiquetaCampoDialogo}"
+                       Target="{Binding ElementName=ContrasenaPasswordBox}"/>
+                <PasswordBox x:Name="ContrasenaPasswordBox" Style="{StaticResource ContrasenaDialogo}"/>
+                <TextBlock Text="Mínimo 6 caracteres." Margin="0,5,0,14" Opacity="0.8"/>
+
+                <Label Content="_Repetir contraseña" Style="{StaticResource EtiquetaCampoDialogo}"
+                       Target="{Binding ElementName=ConfirmacionPasswordBox}"/>
+                <PasswordBox x:Name="ConfirmacionPasswordBox" Style="{StaticResource ContrasenaDialogo}"/>
+            </StackPanel>
+
+            <TextBlock x:Name="EstadoTextBlock" Style="{StaticResource EstadoDialogo}"
+                       Margin="0,12,0,0" AutomationProperties.LiveSetting="Polite"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                <Button Content="Cancelar" Style="{StaticResource BotonDialogo}"
+                        IsCancel="True" Margin="0,0,8,0"
+                        IsEnabled="{Binding IsEnabled, ElementName=RegistrarButton}"/>
+                <Button x:Name="RegistrarButton" Content="Crear cuenta"
+                        Style="{StaticResource BotonPrincipalDialogo}" IsDefault="True"
+                        Click="Registrar_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

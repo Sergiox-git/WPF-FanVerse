@@ -1,4 +1,4 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
 using FanVerse.Models;
@@ -14,6 +14,23 @@ public partial class LoginWindow : Window
     {
         InitializeComponent();
     }
+
+    private void AbrirRegistro_Click(object sender, RoutedEventArgs e)
+    {
+        var ventana = new RegistroWindow(_auth, CorreoTextBox.Text.Trim())
+        {
+            Owner = this
+        };
+
+        if (ventana.ShowDialog() == true && ventana.CorreoRegistrado is string correo)
+        {
+            CorreoTextBox.Text = correo;
+            ContrasenaPasswordBox.Clear();
+            MensajeTextBlock.Text = "Cuenta creada. Introduce tu contraseña para iniciar sesión.";
+            ContrasenaPasswordBox.Focus();
+        }
+    }
+
 
     private async void Entrar_Click(object sender, RoutedEventArgs e)
     {
